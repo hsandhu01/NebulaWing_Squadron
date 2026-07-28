@@ -1,0 +1,38 @@
+# ---------------------------------------------------------------------------
+# Source material — kept locally, never committed.
+# These are the raw generator exports (hundreds of MB). Everything the game
+# actually loads lives in assets/ and is already decimated/compressed.
+# ---------------------------------------------------------------------------
+
+# Raw pre-decimation GLBs (~736 MB)
+assets/raw/
+
+# Assets no longer referenced by the game (retired 2D billboards, the character
+# models that were only used to render the portrait PNGs)
+assets/_unused/
+
+# Original generator exports dropped in the project root
+Meshy_AI_*.glb
+Meteor-Meshy_AI_*.glb
+Friend*.glb
+Shield-power-up_*.glb
+ChatGPT Image*.png
+
+# Packaged drops
+nebulawing_midpoly_ship_package/
+nebulawing_sound_pack/
+*.zip
+ice-shield-power-up.png
+
+# Local editor/tool settings
+.claude/settings.local.json
+
+# Superseded procedural ship model
+ship_lowpoly_backup.js
+
+# Scratch / tooling
+_*.html
+*.tmp.glb
+.DS_Store
+Thumbs.db
+node_modules/

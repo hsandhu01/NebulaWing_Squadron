@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Ship model viewer</title>
+  <style>html,body{margin:0;background:#0a0d1c;overflow:hidden}</style>
+</head>
+<body>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="ship.js"></script>
+  <script>
+    // Static single-frame render of the player ship from a few angles.
+    const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x0a0d1c);
+    scene.add(new THREE.AmbientLight(0x4466aa, 0.9));
+    const key = new THREE.DirectionalLight(0xbfefff, 1.2);
+    key.position.set(-6, 12, 8);
+    scene.add(key);
+    const rim = new THREE.DirectionalLight(0xff7bd5, 0.5);
+    rim.position.set(8, -4, -10);
+    scene.add(rim);
+
+    const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 100);
+
+    // four ships at four angles on one screen
+    const angles = [
+      { pos: [-5.2,  2.2], rotY:  2.6, rotX: 0.35 },   // rear 3/4 high (gameplay view)
+      { pos: [ 5.2,  2.2], rotY:  0.7, rotX: 0.2  },   // front 3/4
+      { pos: [-5.2, -2.6], rotY:  Math.PI, rotX: 0 },  // dead rear
+      { pos: [ 5.2, -2.6], rotY:  1.57, rotX: 0.5 },   // side top
+    ];
+    for (const a of angles) {
+      const s = window.buildNebulaShip(THREE);
+      s.position.set(a.pos[0], a.pos[1], 0);
+      s.rotation.y = a.rotY;
+      s.rotation.x = a.rotX;
+      scene.add(s);
+    }
+
+    camera.position.set(0, 0.5, 13);
+    camera.lookAt(0, 0, 0);
+    renderer.render(scene, camera);   // one frame, then idle
+    document.title = 'ship viewer ready';
+  </script>
+</body>
+</html>

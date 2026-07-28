@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NEBULAWING SQUADRON</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- Preloader: 119 MB of models decode before the game is playable, so hold
+       LAUNCH until they're in rather than popping the ship in mid-flight. -->
+  <div id="preload">
+    <div id="preload-art"></div>
+    <div id="preload-panel">
+      <div id="preload-label">LOADING ASSETS</div>
+      <div id="preload-track"><div id="preload-bar"></div></div>
+      <div id="preload-sub">INITIALIZING SQUADRON SYSTEMS</div>
+    </div>
+  </div>
+
+  <div id="game">
+    <!-- HUD -->
+    <div id="hud" class="hidden">
+      <div class="hud-top">
+        <div class="hud-block">
+          <div class="hud-label">SCORE</div>
+          <div id="score" class="hud-value">0</div>
+        </div>
+        <div class="hud-block center">
+          <div class="hud-label">HI-SCORE</div>
+          <div id="hiscore" class="hud-value">0</div>
+        </div>
+        <div class="hud-block right">
+          <div class="hud-label">SHIELD</div>
+          <div class="bar"><div id="shield-fill" class="bar-fill"></div></div>
+        </div>
+      </div>
+
+      <div id="boss-wrap" class="hidden">
+        <div class="hud-label warn">⚠ DREADNOUGHT ⚠</div>
+        <div class="bar danger"><div id="boss-fill" class="bar-fill red"></div></div>
+        <div id="boss-stage">TARGET: FLANK CANNONS</div>
+      </div>
+
+      <div class="hud-bottom">
+        <div class="hud-block">
+          <div class="hud-label">BOOST</div>
+          <div class="bar boost"><div id="boost-fill" class="bar-fill"></div></div>
+          <div id="weapon" class="hud-sub">
+            <img id="weapon-icon" src="assets/wpn_pistol.png" alt="" />
+            <span id="weapon-name">PULSE PISTOL</span>
+          </div>
+        </div>
+        <div class="hud-block right">
+          <div class="hud-label">WAVE</div>
+          <div id="wave" class="hud-value">1</div>
+        </div>
+      </div>
+
+      <!-- pilot comms (ally, left) -->
+      <div id="comms" class="hidden">
+        <div class="comms-portrait"><img src="assets/portrait_lynx.png" alt="pilot" /></div>
+        <div class="comms-text">
+          <div class="comms-name">CMDR. LYNX</div>
+          <div id="comms-msg"></div>
+        </div>
+      </div>
+
+      <!-- villain comms (enemy, right) -->
+      <div id="villain" class="hidden">
+        <div class="comms-text">
+          <div class="comms-name">WARLORD FENRIR
+            <img id="villain-weapon" src="assets/wpn_smg.png" alt="" />
+          </div>
+          <div id="villain-msg"></div>
+        </div>
+        <div class="comms-portrait villain-portrait"><img src="assets/portrait_fenrir.png" alt="villain" /></div>
+      </div>
+
+      <!-- targeting reticle -->
+      <svg id="reticle" viewBox="0 0 100 100" width="64" height="64">
+        <circle cx="50" cy="50" r="30" />
+        <line x1="50" y1="8"  x2="50" y2="24" />
+        <line x1="50" y1="76" x2="50" y2="92" />
+        <line x1="8"  y1="50" x2="24" y2="50" />
+        <line x1="76" y1="50" x2="92" y2="50" />
+        <circle cx="50" cy="50" r="3" class="dot" />
+      </svg>
+
+      <div id="combo" class="hidden"></div>
+      <div id="roll-flash" class="hidden">BARREL ROLL!</div>
+      <div id="near-miss" class="hidden">NEAR MISS +100</div>
+      <div id="warn-arrows"></div>
+    </div>
+
+    <!-- Title screen -->
+    <div id="title" class="overlay keyart">
+      <img class="logo-img" src="assets/logo.png" alt="NEBULAWING SQUADRON" />
+
+      <div class="title-lower">
+        <!-- ship selection -->
+        <div class="select-label">SELECT YOUR FIGHTER</div>
+        <div class="ship-select">
+          <button class="ship-card" data-scheme="orange">
+            <img src="assets/card_orange.png" alt="Vanguard" />
+            <span>VANGUARD</span>
+          </button>
+          <button class="ship-card" data-scheme="blue">
+            <img src="assets/card_blue.png" alt="Talon" />
+            <span>TALON</span>
+          </button>
+          <button class="ship-card" data-scheme="green">
+            <img src="assets/card_green.png" alt="Viper" />
+            <span>VIPER</span>
+          </button>
+        </div>
+
+        <div class="controls">
+          <div class="ctrl-head">MOUSE</div>
+          <div><span class="key">Move</span> — Fly &nbsp;·&nbsp; <span class="key">L-Click</span> — Fire</div>
+          <div><span class="key">R-Click</span> — Barrel Roll &nbsp;·&nbsp; <span class="key">Wheel</span> — Boost / Brake</div>
+          <div class="ctrl-head">KEYBOARD</div>
+          <div><span class="key">W A S D</span> / <span class="key">Arrows</span> — Steer &nbsp;·&nbsp; <span class="key">Space</span> — Fire</div>
+          <div><span class="key">Q</span> <span class="key">E</span> — Barrel Roll &nbsp;·&nbsp; <span class="key">Shift</span> — Boost &nbsp;·&nbsp; <span class="key">Ctrl</span> — Brake</div>
+        </div>
+        <button id="start-btn" class="btn">LAUNCH</button>
+
+        <!-- squadron roster -->
+        <div class="roster">
+          <div class="roster-member"><img src="assets/portrait_lynx.png" alt="Lynx" /><span>CMDR. LYNX</span></div>
+          <div class="roster-member"><img src="assets/wing_rabbit.png" alt="Dash" /><span>DASH</span></div>
+          <div class="roster-member"><img src="assets/wing_eagle.png" alt="Talon" /><span>SKYE</span></div>
+          <div class="roster-member enemy"><img src="assets/portrait_fenrir.png" alt="Fenrir" /><span>FENRIR</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sector cleared banner, shown after a dreadnought goes down -->
+    <div id="sector-clear" class="hidden">
+      <div class="sc-art"></div>
+      <div class="sc-stats">
+        <span>SECTOR <b id="sc-wave">3</b></span>
+        <span>SCORE <b id="sc-score">0</b></span>
+        <span>KILLS <b id="sc-kills">0</b></span>
+      </div>
+    </div>
+
+    <!-- Game over -->
+    <div id="gameover" class="overlay hidden">
+      <img class="logo-img small" src="assets/logo.png" alt="NEBULAWING SQUADRON" />
+      <h1 class="dead">MISSION FAILED</h1>
+      <div class="result">
+        <div>SCORE <b id="final-score">0</b></div>
+        <div>BEST <b id="final-hi">0</b></div>
+      </div>
+      <button id="restart-btn" class="btn">RETRY</button>
+    </div>
+  </div>
+
+  <!-- Three.js r128 UMD global build + GLTF loader for the player-ship model -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+  <script src="glbkit.js"></script>
+  <script src="ship.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>
