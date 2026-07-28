@@ -19,6 +19,16 @@ html, body {
   font-family: var(--font);
   color: #eaffff;
   cursor: crosshair;
+  /* Applied unconditionally, NOT behind a .touch class: iOS decides whether a
+     gesture belongs to the page or to its own pan/zoom at touchstart, using
+     whatever CSS is live at that instant. Setting it later in the same gesture
+     is too late and the drag gets swallowed. */
+  touch-action: none;
+  overscroll-behavior: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 #game { position: fixed; inset: 0; }
@@ -349,9 +359,33 @@ body.touch .pad:active { background: rgba(56,232,255,0.28); transform: scale(0.9
 body.touch #pad-boost { left: 18px; border-color: var(--orange); color: var(--orange); }
 body.touch #pad-roll  { right: 18px; }
 
-/* stop the browser treating game drags as scroll/zoom gestures */
-body.touch, body.touch #game { touch-action: none; overscroll-behavior: none; }
 body.touch { cursor: auto; }
+#game, #game canvas { touch-action: none; }
+
+/* live input diagnostic — tap the SCORE readout to toggle */
+#diag {
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 60;
+  padding: 10px 14px;
+  background: rgba(2,6,16,0.9);
+  border: 1px solid var(--neon);
+  border-radius: 8px;
+  font-size: 12px; line-height: 1.7; letter-spacing: 1px;
+  color: #dff6ff; text-align: left;
+  pointer-events: none;
+  white-space: pre;
+}
+#diag b { color: var(--gold); }
+#diag .ok { color: #6bff8a; }
+#diag .bad { color: var(--warn); }
+#diag-toggle {
+  position: absolute; top: 0; left: 0;
+  width: 130px; height: 78px;
+  pointer-events: auto;
+  background: transparent;
+  border: none;
+}
 
 /* ---------- Overlays ---------- */
 .overlay {

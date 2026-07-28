@@ -620,20 +620,35 @@
     document.body.classList.add('touch');
   }
 
+  const touchDiag = { starts: 0, moves: 0, lastX: 0, lastY: 0 };
+
   function touchSteer(e) {
-    const t = e.touches && e.touches[0];
+    const t = (e.touches && e.touches[0]) || (e.changedTouches && e.changedTouches[0]);
     if (!t) return;
     enterTouchMode();
+    touchDiag.lastX = Math.round(t.clientX);
+    touchDiag.lastY = Math.round(t.clientY);
     if (!state.running) return;
     pointerToPlay(t.clientX, t.clientY);
     mouse.active = true;
   }
-  // passive:false so we can stop the page scrolling/pull-to-refresh under us
-  window.addEventListener('touchstart', touchSteer, { passive: false });
-  window.addEventListener('touchmove', (e) => {
+  // passive:false so we can stop the page scrolling/pull-to-refresh under us.
+  // Bound on document as well as window — iOS has historically dropped
+  // window-level touchmove in some configurations.
+  const onTouchStart = (e) => {
+    touchDiag.starts++;
     touchSteer(e);
     if (state.running) e.preventDefault();
-  }, { passive: false });
+  };
+  const onTouchMove = (e) => {
+    touchDiag.moves++;
+    touchSteer(e);
+    if (state.running) e.preventDefault();
+  };
+  // document (not window) — touch events bubble through it, and it has been the
+  // more reliable target on iOS.
+  document.addEventListener('touchstart', onTouchStart, { passive: false });
+  document.addEventListener('touchmove', onTouchMove, { passive: false });
 
   // thumb buttons (only rendered on touch devices)
   function bindHoldButton(el, onDown, onUp) {
@@ -1305,6 +1320,7 @@
     if (state.slowmo > 0) { state.slowmo -= dt; dt *= 0.35; }
     if (state.running) update(dt);
     animateIdle(dt);
+    updateDiag();
     renderer.render(scene, camera);
   }
 
@@ -2051,6 +2067,37 @@
   // thumb pads
   bindHoldButton($('pad-boost'), () => { keys.boost = true; }, () => { keys.boost = false; });
   bindHoldButton($('pad-roll'), () => { startRoll(vel.x >= 0 ? 1 : -1); });
+
+  // ---- input diagnostic ---------------------------------------------------
+  // Tapping the top-left corner toggles a live readout. This exists so a real
+  // device can report what the browser is actually delivering, rather than
+  // debugging phone behaviour by guesswork.
+  let diagOn = false;
+  const diagEl = $('diag');
+  $('diag-toggle').addEventListener('click', (e) => {
+    e.preventDefault(); e.stopPropagation();
+    diagOn = !diagOn;
+    diagEl.classList.toggle('hidden', !diagOn);
+  });
+  function updateDiag() {
+    if (!diagOn) return;
+    const yn = (v) => v ? '<span class="ok">YES</span>' : '<span class="bad">NO</span>';
+    let shipMeshes = 0;
+    ship.traverse((o) => { if (o.isMesh) shipMeshes++; });
+    diagEl.innerHTML =
+      `<b>INPUT DIAGNOSTIC</b>\n` +
+      `touch mode   ${yn(touchMode)}\n` +
+      `game running ${yn(state.running)}\n` +
+      `touchstarts  ${touchDiag.starts}\n` +
+      `touchmoves   ${touchDiag.moves}\n` +
+      `last touch   ${touchDiag.lastX},${touchDiag.lastY}\n` +
+      `steering on  ${yn(mouse.active)}\n` +
+      `target x/y   ${mouse.tx.toFixed(1)},${mouse.ty.toFixed(1)}\n` +
+      `ship x/y     ${ship.position.x.toFixed(1)},${ship.position.y.toFixed(1)}\n` +
+      `ship meshes  ${shipMeshes}\n` +
+      `models       ${GLBKit.stats().finished}/${GLBKit.stats().requested}\n` +
+      `shots fired  ${state.tally.fired}`;
+  }
 
   // decode the sound pack as soon as the user interacts (autoplay policy)
   ['pointerdown', 'keydown'].forEach((ev) =>
