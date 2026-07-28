@@ -9,16 +9,20 @@ Three.js — no build step, no framework, no dependencies to install.
 
 ## Controls
 
-| Mouse | Keyboard |
-| --- | --- |
-| **Move** — fly | **W A S D** / **Arrows** — steer |
-| **Left click** — fire | **Space** / **J** — fire |
-| **Right click** — barrel roll | **Q** / **E** — barrel roll |
-| **Wheel** — boost / brake | **Shift** — boost · **Ctrl** — brake |
+| Mouse | Keyboard | Touch |
+| --- | --- | --- |
+| **Move** — fly | **W A S D** / **Arrows** — steer | **Drag** anywhere — fly |
+| **Left click** — fire | **Space** / **J** — fire | *guns are automatic* |
+| **Right click** — barrel roll | **Q** / **E** — barrel roll | **ROLL** pad |
+| **Wheel** — boost / brake | **Shift** — boost · **Ctrl** — brake | **BOOST** pad |
 
-Both schemes are live at once — move the mouse to fly with it, touch a steering
-key to hand control straight back to the keyboard. A barrel roll deflects
-incoming fire.
+All three schemes are live at once — move the mouse to fly with it, touch a
+steering key to hand control back to the keyboard, or drag on a touchscreen.
+A barrel roll deflects incoming fire.
+
+Phones and tablets are supported: drag to fly, guns fire themselves so your
+thumb stays on the stick, and roll/boost sit in the bottom corners. The menus
+reflow for small screens in either orientation.
 
 ## Features
 

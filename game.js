@@ -604,6 +604,50 @@
     }
   });
 
+  // ---- touch controls ---------------------------------------------------
+  // Phones never fire mousemove during a drag, so the mouse path can't serve
+  // them. Dragging anywhere flies the ship (same mapping as the pointer),
+  // guns are automatic, and roll/boost get thumb buttons.
+  // Listeners are always registered (they simply never fire on a mouse-only
+  // machine) and touch mode latches on the first real touch. Sniffing
+  // capability at load misreports hybrid laptops and can't be tested.
+  let touchMode = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
+  if (touchMode) document.body.classList.add('touch');
+
+  function enterTouchMode() {
+    if (touchMode) return;
+    touchMode = true;
+    document.body.classList.add('touch');
+  }
+
+  function touchSteer(e) {
+    const t = e.touches && e.touches[0];
+    if (!t) return;
+    enterTouchMode();
+    if (!state.running) return;
+    pointerToPlay(t.clientX, t.clientY);
+    mouse.active = true;
+  }
+  // passive:false so we can stop the page scrolling/pull-to-refresh under us
+  window.addEventListener('touchstart', touchSteer, { passive: false });
+  window.addEventListener('touchmove', (e) => {
+    touchSteer(e);
+    if (state.running) e.preventDefault();
+  }, { passive: false });
+
+  // thumb buttons (only rendered on touch devices)
+  function bindHoldButton(el, onDown, onUp) {
+    if (!el) return;
+    const down = (e) => { e.preventDefault(); e.stopPropagation(); enterTouchMode(); onDown(); };
+    const up = (e) => { e.preventDefault(); e.stopPropagation(); if (onUp) onUp(); };
+    // pointer events cover touch, pen and mouse in one path
+    el.addEventListener('pointerdown', down);
+    el.addEventListener('pointerup', up);
+    el.addEventListener('pointercancel', up);
+    el.addEventListener('pointerleave', up);
+    el.addEventListener('touchstart', (e) => e.preventDefault(), { passive: false });
+  }
+
   // ship velocity for smooth steering & banking
   const vel = { x: 0, y: 0 };
 
@@ -1334,8 +1378,8 @@
     // rim light sits above/behind, picking out the hull edges against the grid
     shipRim.position.set(ship.position.x, ship.position.y + 3.2, ship.position.z + 4);
 
-    // ---- firing ----
-    if (keys.fire) fire();
+    // ---- firing (automatic on touch: the thumb is busy flying) ----
+    if (keys.fire || touchMode) fire();
 
     // ---- world scroll factor ----
     const scroll = state.speed * dt;
@@ -2003,6 +2047,10 @@
       ui.startBtn.textContent = 'LAUNCH'; el.classList.add('done');
       setTimeout(() => { el.style.display = 'none'; }, 600); } }, 45000);  // failsafe
   })();
+
+  // thumb pads
+  bindHoldButton($('pad-boost'), () => { keys.boost = true; }, () => { keys.boost = false; });
+  bindHoldButton($('pad-roll'), () => { startRoll(vel.x >= 0 ? 1 : -1); });
 
   // decode the sound pack as soon as the user interacts (autoplay policy)
   ['pointerdown', 'keydown'].forEach((ev) =>

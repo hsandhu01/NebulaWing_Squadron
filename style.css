@@ -323,6 +323,36 @@ body.mouse-flying { cursor: none; }
 }
 .sc-stats b { display: block; margin-top: 3px; font-size: 26px; color: var(--neon); }
 
+/* ---------- Touch controls ---------- */
+#touch-pads { display: none; }
+body.touch #touch-pads {
+  display: block;
+  position: absolute; inset: 0;
+  pointer-events: none;
+}
+body.touch .pad {
+  position: absolute; bottom: 16px;
+  pointer-events: auto;
+  width: 86px; height: 86px;
+  border-radius: 50%;
+  border: 2px solid var(--neon-dim);
+  background: rgba(8, 20, 40, 0.5);
+  color: var(--neon);
+  font-family: var(--font);
+  font-size: 11px; font-weight: 800; letter-spacing: 1.5px;
+  backdrop-filter: blur(3px);
+  -webkit-tap-highlight-color: transparent;
+  touch-action: none;
+  user-select: none;
+}
+body.touch .pad:active { background: rgba(56,232,255,0.28); transform: scale(0.94); }
+body.touch #pad-boost { left: 18px; border-color: var(--orange); color: var(--orange); }
+body.touch #pad-roll  { right: 18px; }
+
+/* stop the browser treating game drags as scroll/zoom gestures */
+body.touch, body.touch #game { touch-action: none; overscroll-behavior: none; }
+body.touch { cursor: auto; }
+
 /* ---------- Overlays ---------- */
 .overlay {
   position: absolute; inset: 0;
@@ -460,3 +490,73 @@ body.mouse-flying { cursor: none; }
 }
 .result { display: flex; gap: 48px; font-size: 18px; letter-spacing: 3px; color: #cfeeff; }
 .result b { color: var(--neon); font-size: 30px; display: block; margin-top: 4px; }
+
+/* ===========================================================================
+   Small screens / phones.
+   The title screen stacks logo + ship picker + control list + LAUNCH + roster,
+   which overflowed a landscape phone by ~290px and pushed LAUNCH off-screen.
+   On short viewports the reference material collapses so the picker and the
+   LAUNCH button always fit.
+   =========================================================================== */
+@media (max-height: 560px), (max-width: 760px) {
+  .overlay.keyart { padding-top: 1vh; gap: 4px; }
+  .logo-img { width: min(300px, 46vw); }
+  .title-lower { margin-bottom: 1vh; gap: 7px; }
+
+  /* the control cheatsheet is desktop reference; touch players don't need it */
+  .controls { display: none; }
+  .roster { display: none; }
+
+  .select-label { font-size: 9px; letter-spacing: 2px; }
+  .ship-select { gap: 7px; }
+  .ship-card { width: clamp(84px, 23vw, 116px); padding: 4px 4px 3px; }
+  .ship-card img { height: 42px; }
+  .ship-card span { font-size: 10px; letter-spacing: 1px; }
+  .ship-blurb { font-size: 7px; }
+
+  .btn { font-size: 17px; padding: 10px 30px; letter-spacing: 3px; }
+  .hint { display: none; }
+
+  /* HUD tightens up so nothing clips on a narrow screen */
+  .hud-top, .hud-bottom { padding: 12px 14px; gap: 8px; }
+  .hud-value { font-size: 20px; }
+  .hud-label { font-size: 9px; letter-spacing: 2px; }
+  .bar { width: clamp(74px, 22vw, 150px); height: 9px; }
+  #weapon-icon { width: 36px; height: 20px; }
+  .hud-sub { font-size: 9px; letter-spacing: 1px; }
+
+  /* comms boxes shrink so they don't cover the play area */
+  #comms, #villain { max-width: 46vw; padding: 5px 8px; bottom: 116px; }
+  .comms-portrait { width: 38px; height: 38px; }
+  #comms-msg, #villain-msg { font-size: 11px; }
+  .comms-name { font-size: 8px; }
+
+  #boss-wrap { top: 62px; }
+  .bar.danger { width: min(240px, 62vw); }
+  #boss-stage { font-size: 9px; letter-spacing: 2px; }
+
+  #combo { top: 74px; font-size: 15px; }
+  #near-miss { font-size: 16px; }
+  #roll-flash { font-size: 22px; letter-spacing: 3px; }
+  #reticle { width: 46px; height: 46px; }
+
+  .dead { letter-spacing: 4px; }
+  .result { gap: 26px; font-size: 13px; }
+  .result b { font-size: 21px; }
+  .logo-img.small { width: min(210px, 44vw); }
+
+  /* preloader */
+  #preload-panel { width: 82vw; margin-bottom: 10vh; }
+  #preload-label { font-size: 12px; letter-spacing: 4px; }
+  #preload-sub { font-size: 9px; letter-spacing: 2px; }
+
+  .sc-art { width: 92vw; }
+  .sc-stats { font-size: 11px; gap: 20px; margin-top: -6%; }
+  .sc-stats b { font-size: 18px; }
+}
+
+/* keep the thumb pads clear of the bottom HUD row on very short screens */
+@media (max-height: 430px) {
+  body.touch .pad { width: 68px; height: 68px; font-size: 10px; bottom: 10px; }
+  body.touch #comms, body.touch #villain { bottom: 92px; }
+}
